@@ -1,0 +1,111 @@
+{% extends 'notes/base.html' %}
+
+{% block title %}My Notes Workspace{% endblock %}
+
+{% block extra_css %}
+/* Sticky Note Layout */
+.sticky-board {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.sticky-note-card {
+    width: 230px;
+    height: 230px;
+    padding: 18px;
+    border-radius: 4px;
+    box-shadow: 3px 5px 12px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: none;
+}
+
+/* Simulate natural paper placement angles */
+.sticky-note-card:nth-child(even) { transform: rotate(1.5deg); }
+.sticky-note-card:nth-child(odd) { transform: rotate(-1.5deg); }
+
+.sticky-note-card:hover {
+    transform: scale(1.05) rotate(0deg) !important;
+    box-shadow: 8px 12px 20px rgba(0,0,0,0.12);
+    z-index: 5;
+}
+
+.note-text-area {
+    overflow-y: auto;
+    font-size: 14px;
+}
+
+/* Ensure Django form elements display as Bootstrap Form controls */
+.form-card input[type="text"], .form-card textarea {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    color: #212529;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    margin-bottom: 12px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    
+    <!-- Left Column -->
+    <div class="col-md-4">
+        <div class="card form-card shadow-sm border-0 p-4">
+            <h4 class="h5 fw-bold mb-3 text-muted">Create a Reminder</h4>
+            <form action="{% url 'note_create' %}" method="POST">
+                {% csrf_token %}
+                
+                <div>{{ form.title }}</div>
+                <div>{{ form.content }}</div>
+                
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="small text-secondary mb-0">Colour:</label>
+                        {{ form.color }}
+                    </div>
+                    <button type="submit" class="btn btn-primary fw-bold shadow-sm px-4">Pin It</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-md-8">
+        <div class="sticky-board justify-content-center justify-content-md-start">
+            {% for note in notes %}
+                <div class="sticky-note-card" style="background-color: {{ note.color|default:'#FEF3C7' }};">
+                    <div class="note-text-area">
+                        {% if note.title %}
+                            <h5 class="fw-bold text-dark border-bottom pb-1 border-dark border-opacity-10 mb-2">{{ note.title }}</h5>
+                        {% endif %}
+                        <p class="mb-0 text-dark opacity-75" style="white-space: pre-wrap;">{{ note.content }}</p>
+                    </div>
+                    
+                    <!--utility controls -->
+                    <div class="d-flex justify-content-between align-items-center border-top pt-2 border-dark border-opacity-10 mt-2">
+                        <a href="{% url 'note_update' note.pk %}" class="btn btn-sm btn-link text-decoration-none text-dark p-0"> Edit</a>
+                        
+                        <form action="{% url 'note_delete' note.pk %}" method="POST" class="m-0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-link text-decoration-none text-danger p-0" onclick="return confirm('Archive this note?')">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center w-100 py-5 text-muted">
+                    <p class="fs-5 mb-1">Your board is currently clear! </p>
+                    <p class="small">Add a new pin from the side panel to begin.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

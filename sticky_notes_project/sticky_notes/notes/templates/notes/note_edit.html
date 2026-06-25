@@ -1,0 +1,57 @@
+{% extends 'notes/base.html' %}
+
+{% block title %}Edit Sticky Note{% endblock %}
+
+{% block extra_css %}
+.edit-wrapper {
+    max-width: 480px;
+    margin: 40px auto;
+}
+/* Ensure default Django fields match Bootstrap stack structures */
+.edit-card p {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+.edit-card input[type="text"], .edit-card textarea {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+}
+.edit-card input[type="color"] {
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    width: 60px;
+    height: 38px;
+    cursor: pointer;
+}
+{% endblock %}
+
+{% block content %}
+<div class="edit-wrapper">
+    <div class="mb-3">
+        <a href="{% url 'note_list' %}" class="text-decoration-none text-muted small">← Back</a>
+    </div>
+
+    <div class="card edit-card shadow border-0 p-4">
+        <div class="card-body">
+            <h3 class="card-title fw-bold text-dark mb-1">Edit Sticky Note</h3>
+            <p class="text-secondary small mb-4">Edit your note below.</p>
+            
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{% url 'note_list' %}" class="btn btn-light border px-4 fw-semibold">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold shadow-sm">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
